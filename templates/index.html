@@ -1,0 +1,43 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Index
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+  <div class="topnav">
+    <a href="{{ url_for('index') }}" class="active">
+      <i class="fa fa-home"></i>
+    </a>
+    <a href="{{ url_for('login') }}" style="float:right">Login</a>
+    <a href="{{ url_for('register') }}" style="float:right">Sign up</a>
+  </div>
+  
+  <div class="home-container">
+    <img style="padding-top: 50px;" width="500"src="/static/img/logo2.png">
+    <!--
+    <img src="/static/img/secure.png">
+    <img style="padding-top: 50px;" width="100"src="/static/img/logo.png">
+    -->
+    <h1 style="padding-top: 10px;">Welcome</h1>
+    <h2 style="line-height: 30px;">SurveyManager is for creating individual surveys and evaluates them anonymously</h2>
+
+    <div class="box">
+      <h4><b>Have a token?</b></h4>
+      <form method="POST" action="/joinSurvey">
+        <input style="width: 400px;" type="text" name="token_key">
+        <button type="submit">Go!</button>
+      </form>
+    </div>
+  </div>
+
+
+{% endblock %}

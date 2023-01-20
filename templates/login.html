@@ -1,0 +1,41 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+
+  <div class="topnav">
+    <a href="{{ url_for('index') }}">
+      <i class="fa fa-home"></i>
+    </a>
+    <a href="{{ url_for('login') }}" class="active" style="float:right">Login</a>
+    <a href="{{ url_for('register') }}" style="float:right">Register</a>
+  </div>
+  <p>
+    <div class="login-box">
+      <h1>Login</h1>
+      <hr>
+      <form method="POST" action="/login">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.username) }}
+        {{ wtf.form_field(form.password) }}
+        {{ wtf.form_field(form.remember) }}
+        <div>
+          <button type="submit">Login</button>
+        </div>
+      </form>
+    </div>
+  </p>
+
+{% endblock %}

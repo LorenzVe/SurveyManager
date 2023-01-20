@@ -1,0 +1,48 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Create Survey
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="topnav">
+  <a href="{{ url_for('dashboard') }}">
+    <i class="fa fa-arrow-left"></i> back
+  </a>
+  <a href="{{ url_for('logout') }}" style="float:right">Logout</a>
+</div>
+
+  <div class="box">
+
+    <h1 style="text-align: left;">Creating new survey</h1>
+    <hr>
+    <form method="POST" action="/createSurvey">
+      <div>
+        <h3 style="text-align:left;">Survey Name</h3>
+        <hr>
+        <label for="surveyName"></label>
+        <br>
+        <input type="text" name="surveyName" id="surveyName" placeholder="Name" required autofocus>
+      </div>
+      <br>
+      <div>
+        <h3 style="text-align:left;">Description</h3>
+        <hr>
+        <label for="surveyDesc"></label>
+        <br>
+        <textarea rows="5" name="surveyDesc" id="surveyDesc" placeholder="Write description here." required></textarea>
+      </div>
+      <button type="submit">Create</button>
+    </form>
+
+  </div>
+  
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+{{ survey.title }}
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet"/>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="topnav">
+  <a href="{{ url_for('dashboard') }}">
+    <i class="fa fa-arrow-left"></i>
+  </a>
+  <a href="{{ url_for('logout') }}" style="float:right">Logout</a>
+</div>
+
+<div class="container">
+  <div>
+    <h1>{{ survey.title }}</h1>
+    <hr>
+    <h3>Description</h3>
+    <hr>
+    <p>{{ survey.body }}</p>
+    <hr>
+  </div>
+
+  <div>
+    <h3>Questions</h3>
+    <hr>
+    <ol>
+      {% for q in questions %}
+      <li>
+        <b>{{ q.body }}</b>
+        <ul>
+          {% for a in answers %}
+            {% if q.id == a.question_id %}
+              {% if a.is_correct %}
+              <li style="color: green;">{{ a.body }}</li>
+              {% else %}
+              <li>{{ a.body }}</li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </li>
+      <hr>
+      {% endfor %}
+    </ol>
+    
+  </div>
+
+
+  <button type="button" class="collapsible"><b>New question</b></button>
+  <div class="collapsible-content">
+    <form method="POST" action="/createQuestion">
+      <div style="text-align: left;">
+        <br>
+        <label for="questionBody">Question</label>
+        <br>
+        <input style="width: 100%;" type="text" name="questionBody" id="questionBody" placeholder="Name" required autofocus>
+        <input type="hidden" name="questionSurveyId" id="questionSurveyId" value="{{ survey.id }}">
+      </div>
+      <br>
+      <div>
+        <label for="firstAnswer">1.</label>
+        <input type="text" name="firstAnswer" id="firstAnswer" placeholder="first answer" required>
+        <input type="checkbox" name="checkFirst" id="checkFirst">
+        <br>
+        <label for="secondAnswer">2.</label>
+        <input type="text" name="secondAnswer" id="secondAnswer" placeholder="second answer" required>
+        <input type="checkbox" name="checkSecond" id="checkSecond">
+        <br>
+        <label for="thirdAnswer">3.</label>
+        <input type="text" name="thirdAnswer" id="thirdAnswer" placeholder="third answer">
+        <input type="checkbox" name="checkThird" id="checkThird">
+        <br>
+        <label for="fourthAnswer">4.</label>
+        <input type="text" name="fourthAnswer" id="fourthAnswer" placeholder="fourth answer">
+        <input type="checkbox" name="checkFourth" id="checkFourth">
+      </div>
+      <br>
+      Do not forget to tick the correct answers!
+      <br><br>
+      <button type="submit">Add</button>
+    </form>
+    <br>
+  </div>
+
+  <div>
+    <hr>
+    <form action="{{ url_for('survey', survey_id=survey.id) }}">
+      <button type="submit">Submit survey</button>
+    </form>
+  </div>
+
+  <div class="grid-container-footer">
+    <br><br>
+    <p>This is the end of the page.</p>
+  </div>
+
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
+    }
+  </script>
+  
+  <script type="text/javascript">
+    function Compare() {
+      var strStartTime = document.getElementById("startTime").value;
+      var strEndTime = document.getElementById("endTime").value;
+ 
+      var startTime = new Date().setHours(GetHours(strStartTime), GetMinutes(strStartTime), 0);
+      var endTime = new Date(startTime)
+      endTime = endTime.setHours(GetHours(strEndTime), GetMinutes(strEndTime), 0);
+      if (startTime > endTime) {
+        alert("Start Time is greater than end time");
+        return false;
+      }
+      if (startTime == endTime) {
+        alert("Start Time equals end time");
+        return false;
+      }
+      if (startTime < endTime) {
+        alert("Start Time is less than end time");
+        return true;
+      }
+    }
+    function GetHours(d) {
+      var h = parseInt(d.split(':')[0]);
+      if (d.split(':')[1].split(' ')[1] == "PM") {
+        h = h + 12;
+      }
+      return h;
+    }
+    function GetMinutes(d) {
+      return parseInt(d.split(':')[1].split(' ')[0]);
+    }
+  </script>
+  
+
+</div>
+
+{% endblock %}

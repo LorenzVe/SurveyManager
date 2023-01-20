@@ -1,0 +1,100 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="topnav">
+  <a href="{{ url_for('dashboard') }}" class="active">
+    <i class="fa fa-home"></i>
+  </a>
+  <a href="{{ url_for('logout') }}" style="float:right">Logout</a>
+</div>
+
+<div class="grid-container">
+  <div class="grid-container-header">
+    <div class="main">
+      <h1>Hello, {{ firstname }}!</h1>
+    </div>
+  </div>
+
+  <div class="grid-container-center">
+    <div class="header">
+      News
+    </div>
+    <div class="main">
+      <div class="box">
+        <ul>
+          {% if invitations.first() == none %}
+          <li><b>You have no notifications</b></li>
+          {% else %}
+          {% for i in invitations|reverse %}
+          <li>
+            <b>Notification {{ loop.revindex }}</b><br>
+
+            <em>{{ i.admin_username }}</em> has invited you to <a style="color: #3366BB;" href="{{ url_for('joinSurvey', invitation_id=i.id) }}">participate in his survey</a>.
+          </li>
+          <hr>
+          {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-container-left">
+    <div class="header">
+      My surveys
+    </div>
+    <div class="main">
+      <div class="box">
+        {% if surveys != null %}
+        <ul>
+          <hr>
+          {% for s in surveys|reverse %}
+          <li><a href="{{ url_for('survey', survey_id=s.id) }}">{{ s.title }}</a></li>
+          <hr>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>You have not created any survey yet.</p>
+        {% endif %}
+        <a href="{{ url_for('newSurvey') }}">create</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-container-right">
+    <div class="header">
+      Statistics
+    </div>
+    <div class="main">
+    </div>
+  </div>
+
+  <div class="grid-container-footer">
+    <div class="header">
+      Use Token
+    </div>
+    <div class="main">
+      <form action="/startSurveyWithToken">
+        <input style="width: 100%" type="text" name="token">
+        <br><br>
+        <button type="submit">Start survey</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

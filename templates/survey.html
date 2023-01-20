@@ -1,0 +1,234 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+{{ survey.title }}
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="topnav">
+  <a href="{{ url_for('dashboard') }}">
+    <i class="fa fa-arrow-left"></i>
+  </a>
+  <a href="{{ url_for('logout') }}" style="float:right">Logout</a>
+</div>
+
+<div class="container">
+  <div>
+    <h1>{{ survey.title }}</h1>
+    <h3>Description</h3>
+    <hr>
+    <p>{{ survey.body }}</p>
+    <hr>
+  </div>
+
+  <div>
+    {% if survey.status == 0 %}
+    <h4>Status: <b style="color: red;">inactive</b></h4>
+    {% elif survey.status == 1 and is_available %}
+    <h4>Status: <b style="color: green; text-align: right;">active</b></h4>
+    {% else %}
+    <h4>Status: <b style="color: orange;">pending</b></h4>
+    {% endif %}
+    {% if token.first() != none %}
+    <h4>Token: <em>{{ token.first().token_key }}</em></h4>
+    {% endif %}
+  </div>
+
+  <div>
+    <h3>Participants</h3>
+    <hr>
+    {% if participants|length != 0 %}
+    <b>Total: {{ participants|length }}</b>
+    <br>
+    <ul>
+      {% for p in participants %}
+      <li>{{ p.username }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No participants are added yet.</p>
+    {% endif %}
+  </div>
+  <br>
+
+  {% if participants|length == 0 %}
+  <button type="button" class="collapsible"><b>Invite participants</b></button>
+  <div class="collapsible-content">
+    <form method="POST" action="/sendInvite">
+      <div>
+        <label for="users">Select users</label>
+        <select name="users" id="choices-multiple-remove-button" placeholder="Select users..."multiple required>
+          <option value=""></option>
+          {% for u in users %}
+          <option value="{{ u.id }}">{{ u.username }}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" name="surveyId" id="surveyId" value="{{ survey.id }}">
+      </div>
+      <button type=submit>Invite</button>
+    </form>
+    <br>
+  </div>
+  <br><br>
+  {% endif %}
+
+  {% if token.first() == none %}
+  <button type="button" class="collapsible"><b>Create Token</b></button>
+  <div class="collapsible-content">
+    <form method="POST" action="/createToken">
+      <br>
+      <label for="available">How many usages?</label>
+      <input type="number" min="1" max="100" name="available" value="10"><br>
+      <input type="hidden" name="survey_id" value="{{ survey.id }}">
+      <button type="submit">Create</button>
+      <br><br>
+    </form>
+  </div>
+  {% endif %}
+  <hr>
+
+  {% if survey.start_time == none %}
+  <div>
+    <form method="POST" action="/startSurvey">
+      <div>
+        <label for="startTime">Start time</label>
+        <input type="datetime-local" name="startTime" id="startTime" required>
+        <br>
+        <label for="endTime">End time</label>
+        <input type="datetime-local" name="endTime" id="endTime" required>
+        <input type="hidden" name="survey_id" value="{{ survey.id }}">
+      </div>
+      <button type="submit" onClick="Compare()">Start survey</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if survey.status == 1 %}
+  <div>
+    <form method="POST" action="/stopSurvey">
+      <input type="hidden" name="survey_id" value="{{ survey.id }}">
+      <button type="submit">Stop survey</button>
+    </form>
+  </div>
+  {% endif %}
+
+
+  <div>
+    <h3>Questions</h3>
+    <hr>
+    <button type="button" class="collapsible"><b>Show questions</b></button>
+    <div style="text-align: left;" class="collapsible-content">
+      <br>
+      <ol>
+        {% for q in questions %}
+        <li>
+          <b>{{ q.body }}</b>
+          <ul>
+            {% for a in answers %}
+              {% if q.id == a.question_id %}
+                {% if a.is_correct %}
+                <li style="color: green;">{{ a.body }}</li>
+                {% else %}
+                <li>{{ a.body }}</li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </li>
+        <hr>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+  <div>
+    <h3>Statistics</h3>
+    <hr>
+    <button type="button" class="collapsible"><b>Show statistics</b></button>
+    <div class="collapsible-content">
+      <br>
+      {% if is_plotable %}
+      <p style="text-align: left;">The following plot describes the end results of your survey.</p>
+      <p style="text-align: left;"><b>X-Axis:</b> the index of the corresponding answer</p>
+      <p style="text-align: left;"><b>Y-Axis:</b> the number of participants who answered correct/incorrect </p>
+      <br>
+      <img style="width: 100%; max-width: 600px" src="{{ url_for('plot_png', survey_id=survey.id) }}" alt="results">
+      <hr>
+      {% else %}
+      <p>There are no results yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+
+  <div class="grid-container-footer">
+    <br><br>
+    <p>This is the end of the page.</p>
+  </div>
+
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
+    }
+  </script>
+
+  <script type="text/javascript">
+    function Compare() {
+      var strStartTime = document.getElementById("startTime").value;
+      var strEndTime = document.getElementById("endTime").value;
+ 
+      var startTime = new Date().setHours(GetHours(strStartTime), GetMinutes(strStartTime), 0);
+      var endTime = new Date(startTime)
+      endTime = endTime.setHours(GetHours(strEndTime), GetMinutes(strEndTime), 0);
+      if (startTime > endTime) {
+        alert("Start Time is greater than end time");
+        return false;
+      }
+      if (startTime == endTime) {
+        alert("Start Time equals end time");
+        return false;
+      }
+      if (startTime < endTime) {
+        return true;
+      }
+    }
+    function GetHours(d) {
+      var h = parseInt(d.split(':')[0]);
+      if (d.split(':')[1].split(' ')[1] == "PM") {
+        h = h + 12;
+      }
+      return h;
+    }
+    function GetMinutes(d) {
+      return parseInt(d.split(':')[1].split(' ')[0]);
+    }
+  </script>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Answering {{ survey.title }}
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/topnav.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet"/>
+{% endblock %}
+
+{% block content %}
+
+<div class="topnav">
+  <a href="{{ url_for('dashboard') }}">
+    <i class="fa fa-home"></i>
+  </a>
+  <a href="{{ url_for('logout') }}" style="float:right">Logout</a>
+</div>
+
+<div class="container" onload="startTime()">
+  <div>
+    <h1>{{ survey.title }}</h1>
+    <hr>
+    <h3>Description</h3>
+    <hr>
+    <p>{{ survey.body }}</p>
+    <hr>
+  </div>
+
+  <div>
+    {% if survey.status == 0 and is_available == False %}
+      <p>This survey ended on {{ survey.end_time }}.</p>
+      <br>
+      <p><a href="{{ url_for('dashboard') }} ">return to Dashboard</a></p>
+    {% elif survey.status == 0 and is_available == True %}
+      <p>This survey has been ended prematurely.</p>
+      <br>
+      <p><a href="{{ url_for('dashboard') }} ">return to Dashboard</a></p>
+    {% elif survey.status == 1 and is_available == True %}
+      <h3>Questions</h3>
+      <br>
+      <p>This survey is evaluated anonymously. Please be honest in answering the questions.</p>
+      <hr>
+      <form method="POST" action="/answerSurvey">
+        <ol>
+          {% for q in questions %}
+          <li>
+            <label for="questionBody"><b>{{ q.body }}</b></label>
+            <br>
+            {% for a in answers %}
+            {% if q.id == a.question_id %}
+            <input type="checkbox" name="answers" id="answers" value="1">
+            <input type="hidden" name="answers" id="answers-hidden" value="0">
+            <input type="hidden" name="answer_ids" value="{{ a.id }}">
+            <label for="answers">{{ a.body }}</label>
+            <br>
+            {% endif %}
+            {% endfor %}
+          </li>
+          <hr>
+          {% endfor %}
+        </ol>
+        <button type="submit">Submit</button>
+      </form>
+    {% else %}
+      <p>This survey has not startet yet.</p>
+      <p><b>Start:</b> {{ survey.start_time }}</p>
+      <p><b>End:</b> {{ survey.end_time }}</p>
+      <br>
+      <p><a href="{{ url_for('dashboard') }} ">return to Dashboard</a></p>
+    {% endif %}
+  </div>
+
+  <script>
+    function startTime() {
+      const today = new Date();
+      let h = today.getHours();
+      let m = today.getMinutes();
+      let s = today.getSeconds();
+      m = checkTime(m);
+      s = checkTime(s);
+      document.getElementById('js-clock').innerHTML =  h + ":" + m + ":" + s;
+      setTimeout(startTime, 1000);
+    }
+
+    function getTime() {
+      var today = new Date();
+      var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+      var time = today.getHours()+":"+today.getMinutes() + ":" + today.getSeconds();
+      var dateTime = date + ' ' + time;
+      return dateTime;
+    }
+  </script>
+  
+</div>
+
+{% endblock %}
